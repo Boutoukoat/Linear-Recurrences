@@ -9,9 +9,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include "gmp.h"
+#include "lnrcr.h"
 
-static uint64_t exit_case[6] = { 0, 0, 0, 0, 0, 0 };
+static uint64_t exit_case[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 // ------------------------------------------------------------------------
 // Linear recurrences second order
@@ -52,8 +52,8 @@ bool lnrcr2(int64_t p, int64_t q, mpz_t n)
 
 	do {
 		uint64_t bit = mpz_sizeinbase(n, 2) - 1;
-		mpz_set_ui(ym, 1);
-		mpz_set_ui(zm, 0);
+		mpz_set_si(ym, 1);
+		mpz_set_si(zm, 0);
 		while (bit) {
 			bit -= 1;
 			mpz_mul(y2, ym, ym);
@@ -151,8 +151,8 @@ bool lnrcr2(int64_t p, int64_t q, mpz_t n)
 
 		mpz_set(ya1, ym);
 		mpz_set(za1, zm);
-		mpz_set_ui(ya2, 1);
-		mpz_set_ui(za2, 0);
+		mpz_set_si(ya2, 1);
+		mpz_set_si(za2, 0);
 		for (uint64_t i = 2; i < 3; i++) {
 			if (mpz_cmp(ya1, ya2) == 0 && mpz_cmp(za1, za2) == 0) {
 				exit_case[3] += 1;
@@ -203,97 +203,13 @@ bool lnrcr2(int64_t p, int64_t q, mpz_t n)
 	return result;
 }
 
-// test one second-order linear recurrences, display the pseudoprimes
-int tmain(int argc, char **argv)
+void lnrcr2_debug(void)
 {
-	uint64_t prime_count = 0;
-	uint64_t composite_count = 0;
-	uint64_t pseudoprime_count = 0;
-	uint64_t error_count = 0;
-
-	if (argc != 4) {
-		printf("S[n] = p * S[n-1] + q * S[n-2], S[1] = 1, S[0] = 0;\n");
-		printf("parameters p, q, testing limit\n");
-		printf("e.g. p = 1 q = 1 limit = 170000 displays https://oeis.org/A005845\n");
-	}
-
-	mpz_t n, m;
-	mpz_inits(m, n, 0);
-	const int64_t p = atoll(argv[1]);
-	const int64_t q = atoll(argv[2]);
-	mpz_set_str(m, argv[3], 10);
-	for (mpz_set_si(n, 1); mpz_cmp(n, m) <= 0; mpz_add_ui(n, n, 1)) {
-		bool r = lnrcr2(p, q, n);
-		bool s = mpz_probab_prime_p(n, 15) > 0;	// assume it is deterministic
-		if (r && s)
-			prime_count++;
-		if (!r && !s)
-			composite_count++;
-		if (r && !s) {
-			pseudoprime_count++;
-			gmp_printf("pseudoprime %Zu\n", n);
-		}
-		if (s && !r) {
-			error_count++;
-			gmp_printf("false_negative %Zu !!!!! Wrong !\n", n);
-		}
-	}
-	mpz_clears(m, n, 0);
-
-	printf("\n");
-	printf("Prime count .......... : %lu\n", prime_count);
-	printf("Pseudoprime count .... : %lu\n", pseudoprime_count);
-	printf("Composite count ...... : %lu\n", composite_count);
-	printf("Error count .......... : %lu (MUST be zero)\n", error_count);
-	// Branch coverage
+	// Branch coverage and debug
 	printf("Exit cases : ");
-	for (unsigned i = 0; i < 6; i++)
+	for (unsigned i = 0; i < 9; i++)
 		printf("%lu, ", exit_case[i]);
+	for (unsigned i = 0; i < 9; i++)
+		exit_case[i] = 0;
 	printf("\n");
-	return 0;
 }
-
-// test many second-order linear recurrences, display the number of pseudoprimes
-int main(int argc, char **argv)
-{
-	uint64_t pseudoprime_count = 0;
-	uint64_t error_count = 0;
-	int64_t p, q;
-
-	mpz_t n, m;
-	mpz_inits(m, n, 0);
-	mpz_set_ui(m, 1000000);
-	gmp_printf("    p    q     #pseudoprimes <= %Zd\n", m);
-	for (p = -10; p <= 10; p += 1) {
-		for (q = -10; q <= 10; q += 1) {
-			pseudoprime_count = 0;
-			for (mpz_set_si(n, 1); mpz_cmp(n, m) <= 0; mpz_add_ui(n, n, 2)) {
-				bool r = lnrcr2(p, q, n);
-				bool s = mpz_probab_prime_p(n, 15) > 0;	// assume it is deterministic
-				if (r && !s) {
-					pseudoprime_count++;
-				}
-				if (s && !r) {
-					error_count++;
-					gmp_printf("false_negative %Zu !!!!! Wrong !\n", n);
-				}
-			}
-			printf("%5ld %5ld %8lu\n", p, q, pseudoprime_count);
-			fflush(stdout);
-		}
-	}
-	mpz_clears(m, n, 0);
-
-	printf("\n");
-	printf("Error count .......... : %lu (MUST be zero)\n", error_count);
-	// Branch coverage
-	printf("Exit cases : ");
-	for (unsigned i = 0; i < 6; i++)
-		printf("%lu, ", exit_case[i]);
-	printf("\n");
-	return 0;
-}
-
-
-
-
