@@ -29,10 +29,10 @@ int main(int argc, char **argv)
 
 	mpz_t n, m;
 	mpz_inits(m, n, 0);
-	mpz_set_ui(m, 1000000);
+	mpz_set_ui(m, 2000000);
 	gmp_printf("    p    q    r     #pseudoprimes <= %Zd\n", m);
 	fflush(stdout);
-	for (p = 1; p <= 10; p += 1) {
+	for (p = 0; p <= 10; p += 1) {
 		for (q = -10; q <= 10; q += 1) {
 			for (r = -10; r <= 10; r += 1) {
 				pseudoprime_count = 0;

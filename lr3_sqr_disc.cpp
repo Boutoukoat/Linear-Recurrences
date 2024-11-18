@@ -32,13 +32,13 @@ int main(int argc, char **argv)
 	mpz_set_ui(psp, 0);
 	int64_t k = atoll(argv[1]);
 	int64_t k_end = atoll(argv[2]);
-	gmp_printf("k          : %8Zd %8Zd %8Zd\n", m[0], m[1], m[2]);
+	gmp_printf("k          : a %16s : %8Zd %8Zd %8Zd\n", "", m[0], m[1], m[2]);
 
 	while (k <= k_end) {
 		uint64_t pseudoprime_count = 0;
 		int64_t a = 7 + k * (k - 1);
 
-		printf("k %8ld : ", k);
+		printf("k %8ld : %18ld : ", k, a );
 		mpz_set_ui(n, 3);
 		mpz_set_ui(psp, 0);
 		for (int j = 0; j < 3; j++) {
